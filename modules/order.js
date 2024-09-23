@@ -1,6 +1,40 @@
 const Order = require('../models/order')
 const Axios = require('axios');
 const mongoose = require('mongoose')
+const Kafka = require('../libs/kafka')
+const KafkaService = new Kafka(process.env.KAFKA_HOST_URI);
+
+// 初始化 Consumer 處理 Kafka 消息
+async function initConsumer() {
+    // 訂閱支付成功的 Kafka 主题
+    await KafkaService.initConsumer(['ec-payment'], 'ec-payment-consumer1', async (message) => {
+        try {
+            // 解析 Kafka 消息
+            const paymentInfo = JSON.parse(message.value.toString());
+            const { orderId, status } = paymentInfo;
+    
+            if (!mongoose.Types.ObjectId.isValid(orderId)) {
+                console.log(`UpdateOrderStatus Q : Invalid orderId`)
+                throw new Error('Invalid orderId') 
+            }
+
+            const order = await Order.findById(orderId);
+            if (!order) {
+                console.log(`UpdateOrderStatus Q : order-${orderId} is unexist`)
+                throw new Error(`order-${orderId} is unexist`) 
+            }   
+
+            order.status = status;
+            await order.save();
+            console.log(`order-${orderId} update succeed - Q`)
+
+        } catch (error) {
+            console.error('Error processing payment-success message:', error);
+        }
+    });
+}
+initConsumer();  
+
 
 const OrderModule = {
 
