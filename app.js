@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const DB = require('./configs/database');
+
 // 載入環境變量
 dotenv.config();
 
