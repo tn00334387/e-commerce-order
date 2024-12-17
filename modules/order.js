@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const Kafka = require('../libs/kafka')
 const RedisClient = require('../libs/redis')
 const redis = new RedisClient();
-const KafkaService = new Kafka(process.env.KAFKA_HOST_URI);
+const KafkaService = new Kafka();
 
 redis.subscribe('invalidateUserOrders');
 // process message from redis pub/sub channel

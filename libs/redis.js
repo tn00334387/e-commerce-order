@@ -15,6 +15,10 @@ if (process.env.REDIS_MAPPER_URL){
   })
 }
 
+process.env.REDIS_PASSWORD ? clusterOptions.redisOptions = {
+  password: process.env.REDIS_PASSWORD
+} : 1
+
 class RedisClient {
     constructor() {
         // Init Redis Cluster
